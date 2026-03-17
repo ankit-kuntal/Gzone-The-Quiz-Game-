@@ -10,110 +10,43 @@ export default function LandingPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const appRef = useRef<any>(null);
 
- useEffect(() => {
-  if (typeof window === "undefined" || !canvasRef.current) return;
+useEffect(() => {
+  if (!canvasRef.current) return;
 
-  const canvas = canvasRef.current;
-  let app: any = null;
+  let app: any;
+  let move: any;
 
-  // ✅ Resize
-  const resize = () => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const dpr = window.devicePixelRatio || 1;
+  const init = async () => {
+    try {
+      const TubesCursor = (await import(
+        "threejs-components/build/cursors/tubes1.min.js"
+      )).default;
 
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+      if (!TubesCursor) {
+        console.error("❌ TubesCursor not found");
+        return;
+      }
 
-    if (app?.resize) app.resize();
-  };
-
-  resize();
-  window.addEventListener("resize", resize);
-
-  // ✅ Load script (better way)
-  const script = document.createElement("script");
-  script.src =
-    "https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js";
-  script.async = true;
-
-  script.onload = () => {
-    const TubesCursor = (window as any).TubesCursor;
-
-    if (typeof TubesCursor !== "function") {
-      console.error("❌ TubesCursor load failed");
-      return;
-    }
-
-    // ✅ INIT
-    app = TubesCursor(canvas, {
-      tubes: {
-        colors: ["#f967fb", "#53bc28", "#6958d5"],
-        lights: {
-          intensity: 200,
-          colors: ["#83f36e", "#fe8a2e", "#ff008a", "#60aed5"],
+      app = TubesCursor(canvasRef.current, {
+        tubes: {
+          colors: ["#f967fb", "#53bc28", "#6958d5"],
         },
-      },
-    });
+      });
 
-    console.log("✅ Cursor ready");
+      move = (e: MouseEvent) => app?.onMouseMove?.(e);
+      window.addEventListener("mousemove", move);
 
-    // ✅ 🔥 IMPORTANT: mouse follow fix
-    const move = (e: MouseEvent) => {
-      if (app?.onMouseMove) {
-        app.onMouseMove(e);
-      }
-    };
-
-    window.addEventListener("mousemove", move);
-
-    // ✅ Click = color change (tubes + lights)
-    const handleClick = () => {
-      if (!app?.tubes) return;
-
-      const randomHex = () =>
-        "#" +
-        Math.floor(Math.random() * 16777215)
-          .toString(16)
-          .padStart(6, "0");
-
-      const newTubeColors = Array(3).fill(0).map(randomHex);
-      const newLightColors = Array(4).fill(0).map(randomHex);
-
-      // tubes color
-      if (app.tubes.setColors) {
-        app.tubes.setColors(newTubeColors);
-      } else {
-        app.tubes.colors = newTubeColors;
-      }
-
-      // lights color (🔥 missing in your code)
-      if (app.tubes.lights?.setColors) {
-        app.tubes.lights.setColors(newLightColors);
-      } else if (app.tubes.lights) {
-        app.tubes.lights.colors = newLightColors;
-      }
-
-      console.log("🎨 Colors updated");
-    };
-
-    document.addEventListener("click", handleClick);
-
-    // ✅ cleanup
-    return () => {
-      window.removeEventListener("mousemove", move);
-      document.removeEventListener("click", handleClick);
-      if (app?.destroy) app.destroy();
-    };
+      console.log("✅ Working perfectly");
+    } catch (e) {
+      console.error("❌ Import error:", e);
+    }
   };
 
-  document.head.appendChild(script);
+  init();
 
   return () => {
-    window.removeEventListener("resize", resize);
-    if (script.parentNode) script.parentNode.removeChild(script);
+    window.removeEventListener("mousemove", move);
+    app?.destroy?.();
   };
 }, []);
   return (
