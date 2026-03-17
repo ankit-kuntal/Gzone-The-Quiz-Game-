@@ -1,65 +1,227 @@
+"use client";
+import Link from "next/link";
 import Image from "next/image";
+import { UserCircle } from "lucide-react";// ye error aa rha hai, isko solve kro
+// import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
 
-export default function Home() {
+export default function LandingPage() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const appRef = useRef<any>(null);
+
+ useEffect(() => {
+  if (typeof window === "undefined" || !canvasRef.current) return;
+
+  const canvas = canvasRef.current;
+  let app: any = null;
+
+  // ✅ Resize
+  const resize = () => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    if (app?.resize) app.resize();
+  };
+
+  resize();
+  window.addEventListener("resize", resize);
+
+  // ✅ Load script (better way)
+  const script = document.createElement("script");
+  script.src =
+    "https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js";
+  script.async = true;
+
+  script.onload = () => {
+    const TubesCursor = (window as any).TubesCursor;
+
+    if (typeof TubesCursor !== "function") {
+      console.error("❌ TubesCursor load failed");
+      return;
+    }
+
+    // ✅ INIT
+    app = TubesCursor(canvas, {
+      tubes: {
+        colors: ["#f967fb", "#53bc28", "#6958d5"],
+        lights: {
+          intensity: 200,
+          colors: ["#83f36e", "#fe8a2e", "#ff008a", "#60aed5"],
+        },
+      },
+    });
+
+    console.log("✅ Cursor ready");
+
+    // ✅ 🔥 IMPORTANT: mouse follow fix
+    const move = (e: MouseEvent) => {
+      if (app?.onMouseMove) {
+        app.onMouseMove(e);
+      }
+    };
+
+    window.addEventListener("mousemove", move);
+
+    // ✅ Click = color change (tubes + lights)
+    const handleClick = () => {
+      if (!app?.tubes) return;
+
+      const randomHex = () =>
+        "#" +
+        Math.floor(Math.random() * 16777215)
+          .toString(16)
+          .padStart(6, "0");
+
+      const newTubeColors = Array(3).fill(0).map(randomHex);
+      const newLightColors = Array(4).fill(0).map(randomHex);
+
+      // tubes color
+      if (app.tubes.setColors) {
+        app.tubes.setColors(newTubeColors);
+      } else {
+        app.tubes.colors = newTubeColors;
+      }
+
+      // lights color (🔥 missing in your code)
+      if (app.tubes.lights?.setColors) {
+        app.tubes.lights.setColors(newLightColors);
+      } else if (app.tubes.lights) {
+        app.tubes.lights.colors = newLightColors;
+      }
+
+      console.log("🎨 Colors updated");
+    };
+
+    document.addEventListener("click", handleClick);
+
+    // ✅ cleanup
+    return () => {
+      window.removeEventListener("mousemove", move);
+      document.removeEventListener("click", handleClick);
+      if (app?.destroy) app.destroy();
+    };
+  };
+
+  document.head.appendChild(script);
+
+  return () => {
+    window.removeEventListener("resize", resize);
+    if (script.parentNode) script.parentNode.removeChild(script);
+  };
+}, []);
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      {/* Navbar - high z-index */}
+      <nav className="fixed top-0 left-0 right-0 z-[100] px-9 py-4 flex items-center justify-between text-white backdrop-blur-xl bg-black/10 border-b border-white/5">
+        <div className="flex items-center gap-2">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2b2b2b] to-[#161616] flex items-center justify-center shadow-[0_0_10px_#0005]">
+            <Image src="/logo.png" alt="GZone Logo" width={40} height={40} priority />
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="flex items-center gap-8">
+          <Link href="/privacy-policy" className="text-sm hover:text-gray-300 transition">
+            Privacy Policy
+          </Link>
+          <Link href="/login" aria-label="Login">
+            {/* <UserCircle2 className="w-7 h-7 hover:text-gray-300 transition" /> */}
+          </Link>
         </div>
-      </main>
-    </div>
+      </nav>
+
+      {/* Canvas - background, low z-index, no pointer events */}
+      <canvas
+        ref={canvasRef}
+        className="fixed inset-0 w-full h-full pointer-events-none"
+        style={{ zIndex: -10, background: "transparent" }}
+      />
+
+      {/* Hero - content layer */}
+      <section
+        className="relative h-screen text-white flex items-center justify-center px-4 md:px-20 lg:px-28 overflow-hidden"
+        style={{ zIndex: 10 }}
+      >
+        <div className="container mx-auto max-w-7xl text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="space-y-8 flex flex-col items-center"
+          >
+            <div className="flex items-center justify-center gap-3">
+              <div className="h-[2px] w-8 md:w-16 bg-[#ffb347]" />
+              <h2 className="text-sm md:text-base font-bold tracking-[0.3em] uppercase text-gray-300">
+                GZONE
+              </h2>
+              <div className="h-[2px] w-8 md:w-16 bg-[#ffb347]" />
+            </div>
+
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[1] tracking-tighter uppercase drop-shadow-2xl">
+              KNOWLEDGE <br /> AS A GAME
+            </h1>
+
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl leading-relaxed font-medium">
+              Gzone turns quizzes into exciting competitions — powerful software that works so you don't have to.
+            </p>
+
+            <div className="pt-4">
+              <Link href="/signup">
+                {/* <Button
+                  size="lg"
+                  className="px-10 py-6 text-lg rounded-full font-bold text-black bg-[#ffb347] shadow-[0_0_20px_#ffb347aa] hover:shadow-[0_0_40px_#ffb347] hover:bg-[#ff9f25] transition-all duration-300 hover:scale-105"
+                >
+                  Get Access Now
+                </Button> */}
+              </Link>
+            </div>
+          </motion.div>
+
+          <div className="absolute bottom-6 left-0 right-0 text-center py-3 opacity-70 hover:opacity-100 transition">
+            <Link href="/privacy-policy" className="text-sm hover:text-gray-300">
+              Privacy Policy
+            </Link>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
+//  useEffect(() => {
+//   const canvas = canvasRef.current;
+//   if (!canvas) return;
+
+//   let app: any;
+
+//   const script = document.createElement("script");
+//   script.src =
+//     "https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js";
+
+//   script.onload = () => {
+//     const TubesCursor = (window as any).TubesCursor;
+
+//     if (!TubesCursor) {
+//       console.error("Library not loaded");
+//       return;
+//     }
+
+//     app = TubesCursor(canvas);
+
+//     // 🔥 IMPORTANT: manually trigger mouse
+//     const move = (e: MouseEvent) => {
+//       if (app?.onMouseMove) {
+//         app.onMouseMove(e);
+//       }
+//     };
+
+//     window.addEventListener("mousemove", move);
+//   };
+
+//   document.head.appendChild(script);
+// }, []);
