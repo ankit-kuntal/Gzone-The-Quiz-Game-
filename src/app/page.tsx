@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { UserCircle } from "lucide-react";// ye error aa rha hai, isko solve kro
-// import { Button } from "@/components/ui/button";
+import { UserCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 
@@ -60,11 +60,11 @@ useEffect(() => {
         </div>
 
         <div className="flex items-center gap-8">
-          <Link href="/privacy-policy" className="text-sm hover:text-gray-300 transition">
+          <Link href="/frontend/privacy-policy" className="text-sm hover:text-gray-300 transition">
             Privacy Policy
           </Link>
-          <Link href="/login" aria-label="Login">
-            {/* <UserCircle2 className="w-7 h-7 hover:text-gray-300 transition" /> */}
+          <Link href="/frontend/login" aria-label="Login">
+            <UserCircle className="w-7 h-7 hover:text-gray-300 transition" />
           </Link>
         </div>
       </nav>
@@ -105,19 +105,19 @@ useEffect(() => {
             </p>
 
             <div className="pt-4">
-              <Link href="/signup">
-                {/* <Button
+              <Link href="/frontend/signup">
+                <Button
                   size="lg"
                   className="px-10 py-6 text-lg rounded-full font-bold text-black bg-[#ffb347] shadow-[0_0_20px_#ffb347aa] hover:shadow-[0_0_40px_#ffb347] hover:bg-[#ff9f25] transition-all duration-300 hover:scale-105"
                 >
                   Get Access Now
-                </Button> */}
+                </Button>
               </Link>
             </div>
           </motion.div>
 
           <div className="absolute bottom-6 left-0 right-0 text-center py-3 opacity-70 hover:opacity-100 transition">
-            <Link href="/privacy-policy" className="text-sm hover:text-gray-300">
+            <Link href="/frontend/privacy-policy" className="text-sm hover:text-gray-300">
               Privacy Policy
             </Link>
           </div>
@@ -126,35 +126,3 @@ useEffect(() => {
     </>
   );
 }
-//  useEffect(() => {
-//   const canvas = canvasRef.current;
-//   if (!canvas) return;
-
-//   let app: any;
-
-//   const script = document.createElement("script");
-//   script.src =
-//     "https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js";
-
-//   script.onload = () => {
-//     const TubesCursor = (window as any).TubesCursor;
-
-//     if (!TubesCursor) {
-//       console.error("Library not loaded");
-//       return;
-//     }
-
-//     app = TubesCursor(canvas);
-
-//     // 🔥 IMPORTANT: manually trigger mouse
-//     const move = (e: MouseEvent) => {
-//       if (app?.onMouseMove) {
-//         app.onMouseMove(e);
-//       }
-//     };
-
-//     window.addEventListener("mousemove", move);
-//   };
-
-//   document.head.appendChild(script);
-// }, []);
