@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-// import AuthGuard from "@/components/AuthGuard";
-// import { GuestProvider } from "@/contexts/GuestContext";
+// import { GuestProvider } from "@/contexts/GuestContext"; // <-- uncomment
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,7 +17,7 @@ export const metadata: Metadata = {
   title: "Gzone",
   description: "The Quiz Competition Platform",
   icons: {
-    icon: "/logo.png", // <-- Add this
+    icon: "/logo.png",
   },
 };
 
@@ -32,10 +31,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* <GuestProvider> */}
-        {/* <AuthGuard> */}
+        {/* <GuestProvider> {/* <-- now wrap children */}
           {children}
-        {/* </AuthGuard> */}
         {/* </GuestProvider> */}
       </body>
     </html>

@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
 
     await connectToDatabase();
 
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
-
     if (existingUser) {
       return NextResponse.json(
         { error: "User already exists" },
@@ -29,7 +29,17 @@ export async function POST(request: NextRequest) {
     const otp = generateOTP();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Create user with OTP (not verified yet)
+    // ✅ Send OTP first
+    const emailSent = await sendOTPEmail(email, otp, username);
+
+    if (!emailSent) {
+      return NextResponse.json(
+        { error: "Failed to send OTP email. Please try again." },
+        { status: 500 }
+      );
+    }
+
+    // ✅ Only create user after OTP email sent successfully
     const user = await User.create({
       username,
       email,
@@ -39,16 +49,7 @@ export async function POST(request: NextRequest) {
       isEmailVerified: false,
     });
 
-    // Send OTP email
-    const emailSent = await sendOTPEmail(email, otp, username);
-
-    if (!emailSent) {
-      // If email fails, still return success but warn user
-      console.warn(`⚠️ OTP email failed to send for ${email}, but user created`);
-    }
-
-    // Return pending verification status
-    const response = NextResponse.json(
+    return NextResponse.json(
       {
         success: true,
         message: "Account created! OTP sent to your email.",
@@ -57,11 +58,8 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-
-    return response;
   } catch (error) {
     console.error("Signup Error ⇒", error);
-
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

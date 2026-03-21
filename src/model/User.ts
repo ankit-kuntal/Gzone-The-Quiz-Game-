@@ -29,14 +29,14 @@ const userSchema = new Schema<IUser>(
     username: {
       type: String,
       required: true,
-      unique: true,
+      unique: true, // ✅ unique is enough, no need for manual index
       trim: true,
       minlength: 3,
     },
     email: {
       type: String,
       required: true,
-      unique: true,
+      unique: true, // ✅ unique is enough
       lowercase: true,
       trim: true,
       match: [/.+\@.+\..+/, "Please use a valid email"],
@@ -68,17 +68,15 @@ const userSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-// 🔐 Hash password before save (NO next)
+// 🔐 Hash password before save
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
-
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-// 🔐 Hash password on update (NO next)
+// 🔐 Hash password on update
 userSchema.pre("findOneAndUpdate", async function () {
   const update: any = this.getUpdate();
-
   if (update?.password) {
     update.password = await bcrypt.hash(update.password, 10);
     this.setUpdate(update);
@@ -90,9 +88,9 @@ userSchema.methods.comparePassword = async function (enteredPassword: string) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// ⚡ Indexes
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
+// ⚡ Remove duplicate manual indexes
+// userSchema.index({ email: 1 });
+// userSchema.index({ username: 1 });
 
 // Model
 const User = models.User || model<IUser>("User", userSchema);

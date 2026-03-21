@@ -148,7 +148,7 @@ function Login() {
           <div className="text-center">
             <p className="text-gray-400">
               Don&apos;t have an account?{" "}
-              <Link href="/signup" className="text-emerald-400 font-semibold">
+              <Link href="/frontend/signup" className="text-emerald-400 font-semibold">
                 Create one here
               </Link>
             </p>

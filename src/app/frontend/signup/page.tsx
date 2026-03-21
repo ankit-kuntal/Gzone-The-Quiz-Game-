@@ -67,7 +67,7 @@ export default function SignupPage() {
       // If verification required, redirect to OTP page
       if (data.requiresVerification) {
         alert("Account created! OTP has been sent to your email.");
-        router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
+        router.push(`/frontend/verify-otp?email=${encodeURIComponent(data.email)}`);
       } else {
         // Fallback: if no OTP required (shouldn't happen now)
         if (data.token) localStorage.setItem("token", data.token);
@@ -89,10 +89,17 @@ export default function SignupPage() {
       {/* Right Side - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6">
         <div className="w-full max-w-md p-6 border border-white/10 rounded-xl bg-white/5 backdrop-blur-md">
+        <div className="mb-4">
+        <Link
+          href="/"
+          className="text-sm text-gray-400 hover:text-[#ffb347] transition-all duration-300"
+        >
+          ← Back to Home
+        </Link>
+      </div>
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-white mb-2">Create Account</h1>
-            <p className="text-gray-400">Join our community of knowledge seekers</p>
           </div>
 
           {/* Form */}
@@ -191,7 +198,7 @@ export default function SignupPage() {
           <div className="mt-6 text-center">
             <p className="text-gray-400">
               Already have an account?{" "}
-              <Link href="/login" className="text-emerald-400 hover:text-emerald-300 font-semibold">
+              <Link href="/frontend/login" className="text-emerald-400 hover:text-emerald-300 font-semibold">
                 Login here
               </Link>
             </p>
